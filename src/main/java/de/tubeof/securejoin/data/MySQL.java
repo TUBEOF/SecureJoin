@@ -27,26 +27,26 @@ public class MySQL {
     public void connect() {
         if (!isConnected()) {
             try {
-                ccs.sendMessage(data.getPrefix() + "§aTrying to connect to MySQL-Server §e" + host + " §a...");
+                ccs.sendMessage(data.getLoggerPrefix() + "§aTrying to connect to MySQL-Server §e" + host + " §a...");
                 connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
-                ccs.sendMessage(data.getPrefix() + "§aConnection to MySQL-Server successfully established.");
+                ccs.sendMessage(data.getLoggerPrefix() + "§aConnection to MySQL-Server successfully established.");
                 createTable();
             } catch (SQLException e) {
                 e.printStackTrace();
-                ccs.sendMessage(data.getPrefix() + "§cCould not connect to MySQL!");
+                ccs.sendMessage(data.getLoggerPrefix() + "§cCould not connect to MySQL!");
             }
         }
     }
 
     public void reconnect() {
         try {
-            ccs.sendMessage(data.getPrefix() + "§aTrying to reconnect to MySQL-Server §e" + host + " §a...");
+            ccs.sendMessage(data.getLoggerPrefix() + "§aTrying to reconnect to MySQL-Server §e" + host + " §a...");
             connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
-            ccs.sendMessage(data.getPrefix() + "§aConnection to MySQL-Server successfully established.");
+            ccs.sendMessage(data.getLoggerPrefix() + "§aConnection to MySQL-Server successfully established.");
             createTable();
         } catch (SQLException e) {
             e.printStackTrace();
-            ccs.sendMessage(data.getPrefix() + "§cCould not connect to MySQL!");
+            ccs.sendMessage(data.getLoggerPrefix() + "§cCould not connect to MySQL!");
         }
     }
 
@@ -55,9 +55,9 @@ public class MySQL {
             try {
                 connection.close();
                 connection = null;
-                ccs.sendMessage(data.getPrefix() + "§aConnection to MySQL successfully closed.");
+                ccs.sendMessage(data.getLoggerPrefix() + "§aConnection to MySQL successfully closed.");
             } catch (SQLException e) {
-                ccs.sendMessage(data.getPrefix() + "§cThe connection could not be closed!");
+                ccs.sendMessage(data.getLoggerPrefix() + "§cThe connection could not be closed!");
             }
         }
     }
@@ -267,7 +267,7 @@ public class MySQL {
 
     public void createTable() {
         if (!isConnected()) {
-            ccs.sendMessage(data.getPrefix() + "§cThere is no connection to MySQL!");
+            ccs.sendMessage(data.getLoggerPrefix() + "§cThere is no connection to MySQL!");
             return;
         }
         try {
@@ -276,9 +276,9 @@ public class MySQL {
             PreparedStatement ps1 = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + cache.getStringValue("DataPool.MySQL.Prefix") + "userSessions(uuid VARCHAR(36), lastConnectedIp VARCHAR(32), lastConnectedTimestamp LONG)");
             ps1.executeUpdate();
 
-            ccs.sendMessage(data.getPrefix() + "§aDefault tables were created successfully!");
+            ccs.sendMessage(data.getLoggerPrefix() + "§aDefault tables were created successfully!");
         } catch (SQLException e) {
-            ccs.sendMessage(data.getPrefix() + "§cDefault tables could not be created!");
+            ccs.sendMessage(data.getLoggerPrefix() + "§cDefault tables could not be created!");
             e.printStackTrace();
         }
     }

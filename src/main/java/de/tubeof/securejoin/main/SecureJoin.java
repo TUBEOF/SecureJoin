@@ -24,7 +24,6 @@ import java.util.*;
 public class SecureJoin extends JavaPlugin {
 
     private final String prefixTubeTilsChecker = "§7[§eTubeTilsChecker§7] §f";
-
     private final ConsoleCommandSender ccs = Bukkit.getConsoleSender();
     private final PluginManager pluginManager = Bukkit.getPluginManager();
 
@@ -49,24 +48,24 @@ public class SecureJoin extends JavaPlugin {
 
         mySQL = new MySQL(true);
 
-        ccs.sendMessage(data.getPrefix() + "§7==================================================");
-        ccs.sendMessage(data.getPrefix() + "§aJOIN MY DISCORD NOW: §ehttps://discord.gg/73ZDfbx");
-        ccs.sendMessage(data.getPrefix() + "§7==================================================");
+        ccs.sendMessage(data.getLoggerPrefix() + "§7==================================================");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aJOIN MY DISCORD NOW: §ehttps://discord.gg/73ZDfbx");
+        ccs.sendMessage(data.getLoggerPrefix() + "§7==================================================");
 
         registerListener();
         registerCommands();
         startTasks();
         bStats();
 
-        ccs.sendMessage(data.getPrefix() + "§aThe plugin was successfully activated!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aThe plugin was successfully activated!");
     }
 
     @Override
     public void onDisable() {
-        ccs.sendMessage(data.getPrefix() + "§aThe Plugin will be deactivated ...");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aThe Plugin will be deactivated ...");
 
 
-        ccs.sendMessage(data.getPrefix() + "§aThe plugin was successfully deactivated!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aThe plugin was successfully deactivated!");
     }
 
     private void checkTubeTils() {
@@ -138,40 +137,40 @@ public class SecureJoin extends JavaPlugin {
     }
 
     private void manageFiles() {
-        ccs.sendMessage(data.getPrefix() + "§aLoading Config Files ...");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aLoading Config Files ...");
 
         config.cfgConfig();
         config.setCache();
 
         if(!cache.getIntegerValue("ConfigVersion").equals(data.getCurrentConfigVersion())) config.configUpdateMessage();
 
-        ccs.sendMessage(data.getPrefix() + "§aConfig Files was successfully loaded!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aConfig Files was successfully loaded!");
     }
 
     private void registerListener() {
-        ccs.sendMessage(data.getPrefix() + "§aListeners will be registered ...");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aListeners will be registered ...");
 
 
-        ccs.sendMessage(data.getPrefix() + "§aListeners have been successfully registered!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aListeners have been successfully registered!");
     }
 
     private void registerCommands() {
-        ccs.sendMessage(data.getPrefix() + "§aCommands will be registered ...");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aCommands will be registered ...");
 
 
 
-        ccs.sendMessage(data.getPrefix() + "§aCommands have been successfully registered!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aCommands have been successfully registered!");
     }
 
     private void startTasks() {
-        ccs.sendMessage(data.getPrefix() + "§aStarting Tasks ...");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aStarting Tasks ...");
 
 
-        ccs.sendMessage(data.getPrefix() + "§aTasks have been successfully started!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aTasks have been successfully started!");
     }
 
     private void bStats() {
-        ccs.sendMessage(data.getPrefix() + "§aLoad and activate bStats ...");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aLoad and activate bStats ...");
 
         Metrics metrics = new Metrics(this, 10677);
 
@@ -231,7 +230,7 @@ public class SecureJoin extends JavaPlugin {
             else return "false";
         }));
 
-        ccs.sendMessage(data.getPrefix() + "§abStats was successfully loaded and activated!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§abStats was successfully loaded and activated!");
     }
 
     public static SecureJoin getInstance() {
