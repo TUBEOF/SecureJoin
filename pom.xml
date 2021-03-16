@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.tubeof</groupId>
-    <artifactId>SecureLogin</artifactId>
+    <artifactId>SecureJoin</artifactId>
     <version>SNAPSHOT-XXX</version>
     <packaging>jar</packaging>
 
@@ -20,7 +20,7 @@
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
-                    <finalName>SecureLogin-${project.version}</finalName>
+                    <finalName>SecureJoin-${project.version}</finalName>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
                     </descriptorRefs>
