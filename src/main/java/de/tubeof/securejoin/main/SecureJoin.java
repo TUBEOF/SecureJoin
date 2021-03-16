@@ -5,44 +5,52 @@ import de.tubeof.securejoin.data.Data;
 import de.tubeof.securejoin.files.Config;
 import de.tubeof.securejoin.utils.IpFetcher;
 import de.tubeof.securejoin.utils.Metrics;
+import de.tubeof.tubetils.main.TubeTils;
 import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.json.JSONObject;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SecureJoin extends JavaPlugin {
 
-    private final ConsoleCommandSender ccs = Bukkit.getConsoleSender();
+    private final String prefixTubeTilsChecker = "§7[§eTubeTilsChecker§7] §f";
 
-    private static final Cache cache = new Cache();
-    private static final Data data = new Data();
+    private final ConsoleCommandSender ccs = Bukkit.getConsoleSender();
+    private final PluginManager pluginManager = Bukkit.getPluginManager();
 
     private static SecureJoin instance;
+    private static Cache cache;
+    private static Data data;
     private static Config config;
 
     @Override
     public void onEnable() {
-        ccs.sendMessage(data.getPrefix() + "§aThe Plugin will be activated ...");
+        instance = this;
 
-        ccs.sendMessage(data.getPrefix() + "==================================================");
-        ccs.sendMessage(data.getPrefix() + "JOIN MY DISCORD NOW: §ehttps://discord.gg/73ZDfbx");
-        ccs.sendMessage(data.getPrefix() + "==================================================");
+        checkTubeTils();
+        TubeTils.Properties.setDebuggingStatus(false);
 
-        manageInstances();
+        cache = new Cache();
+        data = new Data();
+
+        config = new Config();
+        manageFiles();
+
+        ccs.sendMessage(data.getPrefix() + "§7==================================================");
+        ccs.sendMessage(data.getPrefix() + "§aJOIN MY DISCORD NOW: §ehttps://discord.gg/73ZDfbx");
+        ccs.sendMessage(data.getPrefix() + "§7==================================================");
+
         registerListener();
         registerCommands();
-        manageFiles();
         startTasks();
         bStats();
 
@@ -57,16 +65,72 @@ public class SecureJoin extends JavaPlugin {
         ccs.sendMessage(data.getPrefix() + "§aThe plugin was successfully deactivated!");
     }
 
-    private void manageInstances() {
-        ccs.sendMessage(data.getPrefix() + "§aLoading Config Files ...");
+    private void checkTubeTils() {
+        Plugin tubetils = pluginManager.getPlugin("TubeTils");
+        if(tubetils == null) {
+            ccs.sendMessage(prefixTubeTilsChecker + "§cTubeTils are not installed! Downloading ...");
+            getTubeTils();
+        } else {
+            ccs.sendMessage(prefixTubeTilsChecker + "§aTubeTils §ev" + tubetils.getDescription().getVersion() + " §ais installed!");
+            return;
+        }
+    }
 
-        //Instance
-        instance = this;
+    private float downloadProgress = 0;
+    private void getTubeTils() {
+        try {
+            URL url = new URL("https://hub.tubeof.de/repo/de/tubeof/TubeTils/SNAPSHOT-28/TubeTils-SNAPSHOT-28.jar");
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestProperty("User-Agent", "TubeApiBridgeConnector");
+            connection.setRequestProperty("Header-Token", "SD998FS0FG07");
+            int filesize = connection.getContentLength();
 
-        //Config
-        config = new Config();
+            Timer timer = new Timer();
+            Thread thread = new Thread(() -> {
+                TimerTask timerTask = new TimerTask() {
+                    @Override
+                    public void run() {
+                        ccs.sendMessage(prefixTubeTilsChecker + "§cDownload-Progress: §e" + (int)downloadProgress + "%");
+                    }
+                };
+                timer.schedule(timerTask, 0, 250);
+            });
+            thread.start();
 
-        ccs.sendMessage(data.getPrefix() + "§aConfig Files was successfully loaded!");
+            float totalDataRead = 0;
+            BufferedInputStream in = new java.io.BufferedInputStream(connection.getInputStream());
+            FileOutputStream fos = new java.io.FileOutputStream("plugins/TubeTils.jar");
+            BufferedOutputStream bout = new BufferedOutputStream(fos,1024);
+            byte[] byteData = new byte[1024];
+            int i = 0;
+
+            while((i=in.read(byteData,0,1024))>=0) {
+                totalDataRead=totalDataRead+i;
+                bout.write(byteData,0,i);
+                downloadProgress = (totalDataRead*100) / filesize;
+            }
+            timer.cancel();
+            thread.interrupt();
+            ccs.sendMessage(prefixTubeTilsChecker + "§cDownload-Progress: §e" + (int)downloadProgress + "%");
+
+            bout.close();
+            in.close();
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+
+        File file = new File("plugins/TubeTils.jar");
+        try {
+            Plugin plugin = pluginManager.loadPlugin(file);
+            pluginManager.enablePlugin(plugin);
+        } catch (Exception e) {
+            e.printStackTrace();
+
+            ccs.sendMessage(prefixTubeTilsChecker + "§cError while enabling TubeTils! Stopping Plugin ...");
+            pluginManager.disablePlugin(this);
+        }
     }
 
     private void manageFiles() {
@@ -90,7 +154,7 @@ public class SecureJoin extends JavaPlugin {
     private void registerCommands() {
         ccs.sendMessage(data.getPrefix() + "§aCommands will be registered ...");
 
-        PluginManager pluginManager = Bukkit.getPluginManager();
+
 
         ccs.sendMessage(data.getPrefix() + "§aCommands have been successfully registered!");
     }

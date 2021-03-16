@@ -2,4 +2,7 @@ name: SecureJoin
 version: 1.0-PRE
 api-version: 1.14
 author: TUBEOF
+softdepend:
+  - TubeTils
+
 main: de.tubeof.securejoin.main.SecureJoin

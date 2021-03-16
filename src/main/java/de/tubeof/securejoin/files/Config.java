@@ -69,6 +69,8 @@ public class Config {
         ccs.sendMessage(data.getPrefix() + "§aConfig values are loaded into the cache ...");
 
         cache.addStringValue("General.Prefix", cfg.getString("General.Prefix"));
+        data.setPrefix(cache.getStringValue("General.Prefix"));
+
         cache.addStringValue("General.NoPerms", cfg.getString("General.NoPerms"));
 
         cache.addStringValue("DataPool.MySQL.Host", cfg.getString("DataPool.MySQL.Host"));

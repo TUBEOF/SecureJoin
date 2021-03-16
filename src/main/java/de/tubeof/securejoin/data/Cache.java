@@ -12,9 +12,11 @@ public class Cache {
 
     private CacheContainer cacheContainer;
 
-    public Cache() {}
+    public Cache() {
+        setup();
+    }
 
-    public void setup() {
+    private void setup() {
         cacheContainer = new CacheContainer("SecureLoginCacheContainer");
         cacheContainer.registerCacheType(String.class);
         cacheContainer.registerCacheType(Integer.class);

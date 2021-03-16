@@ -11,10 +11,20 @@ public class Data {
 
     public Data() {}
 
+    private final String prefixLogger = "§7[§2SecureJoinLogger§7] §f";
     private final ArrayList<String> verifyedHosts = new ArrayList<>(Arrays.asList("ZAP", "Nitrado", "Aternos", "Pingperfect"));
+    private String prefix = "§7[§2SecureJoin§7] §f";
+
+    public String getLoggerPrefix() {
+        return prefixLogger;
+    }
 
     public String getPrefix() {
-        return cache.getStringValue("prefix");
+        return prefix;
+    }
+
+    public void setPrefix(String prefix) {
+        this.prefix = prefix;
     }
 
     public Integer getCurrentConfigVersion() {
