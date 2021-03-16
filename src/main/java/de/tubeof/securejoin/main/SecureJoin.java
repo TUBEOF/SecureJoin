@@ -2,6 +2,7 @@ package de.tubeof.securejoin.main;
 
 import de.tubeof.securejoin.data.Cache;
 import de.tubeof.securejoin.data.Data;
+import de.tubeof.securejoin.data.MySQL;
 import de.tubeof.securejoin.files.Config;
 import de.tubeof.securejoin.utils.IpFetcher;
 import de.tubeof.securejoin.utils.Metrics;
@@ -28,6 +29,7 @@ public class SecureJoin extends JavaPlugin {
     private final PluginManager pluginManager = Bukkit.getPluginManager();
 
     private static SecureJoin instance;
+    private static MySQL mySQL;
     private static Cache cache;
     private static Data data;
     private static Config config;
@@ -44,6 +46,8 @@ public class SecureJoin extends JavaPlugin {
 
         config = new Config();
         manageFiles();
+
+        mySQL = new MySQL(true);
 
         ccs.sendMessage(data.getPrefix() + "§7==================================================");
         ccs.sendMessage(data.getPrefix() + "§aJOIN MY DISCORD NOW: §ehttps://discord.gg/73ZDfbx");

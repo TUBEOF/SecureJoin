@@ -28,11 +28,10 @@ public class MySQL {
         if (!isConnected()) {
             try {
                 ccs.sendMessage(data.getPrefix() + "§aTrying to connect to MySQL-Server §e" + host + " §a...");
-                Class.forName("org.mariadb.jdbc.Driver");
                 connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
                 ccs.sendMessage(data.getPrefix() + "§aConnection to MySQL-Server successfully established.");
                 createTable();
-            } catch (SQLException | ClassNotFoundException e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
                 ccs.sendMessage(data.getPrefix() + "§cCould not connect to MySQL!");
             }
