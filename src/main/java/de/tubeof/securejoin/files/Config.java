@@ -22,10 +22,10 @@ public class Config {
     private final FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 
     public void configUpdateMessage() {
-        ccs.sendMessage(data.getPrefix() + "§e######################################################################");
-        ccs.sendMessage(data.getPrefix() + "§cA new config is included in the update!");
-        ccs.sendMessage(data.getPrefix() + "§cPlease delete the old config so that the changes will be applied.");
-        ccs.sendMessage(data.getPrefix() + "§e######################################################################");
+        ccs.sendMessage(data.getLoggerPrefix() + "§e######################################################################");
+        ccs.sendMessage(data.getLoggerPrefix() + "§cA new config is included in the update!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§cPlease delete the old config so that the changes will be applied.");
+        ccs.sendMessage(data.getLoggerPrefix() + "§e######################################################################");
     }
 
     private void saveCFG() {
@@ -67,7 +67,7 @@ public class Config {
     }
 
     public void setCache() {
-        ccs.sendMessage(data.getPrefix() + "§aConfig values are loaded into the cache ...");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aConfig values are loaded into the cache ...");
 
         cache.addStringValue("General.Prefix", cfg.getString("General.Prefix"));
         data.setPrefix(cache.getStringValue("General.Prefix"));
@@ -88,6 +88,6 @@ public class Config {
 
         cache.addIntegerValue("ConfigVersion", cfg.getInt("ConfigVersion"));
 
-        ccs.sendMessage(data.getPrefix() + "§aConfig values were successfully cached!");
+        ccs.sendMessage(data.getLoggerPrefix() + "§aConfig values were successfully cached!");
     }
 }
