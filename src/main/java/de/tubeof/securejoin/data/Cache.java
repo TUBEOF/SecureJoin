@@ -17,7 +17,7 @@ public class Cache {
     }
 
     private void setup() {
-        cacheContainer = new CacheContainer("SecureLoginCacheContainer");
+        cacheContainer = new CacheContainer("SecureJoinCacheContainer");
         cacheContainer.registerCacheType(String.class);
         cacheContainer.registerCacheType(Integer.class);
         cacheContainer.registerCacheType(Boolean.class);
