@@ -44,6 +44,7 @@ public class Config {
 
         cfg.addDefault("DataPool.MySQL.Host", "127.0.0.1");
         cfg.addDefault("DataPool.MySQL.Port", "3306");
+        cfg.addDefault("DataPool.MySQL.Prefix", "sj01_");
         cfg.addDefault("DataPool.MySQL.Database", "databasename");
         cfg.addDefault("DataPool.MySQL.Username", "databaseusername");
         cfg.addDefault("DataPool.MySQL.Password", "databasepassword");
@@ -75,6 +76,7 @@ public class Config {
 
         cache.addStringValue("DataPool.MySQL.Host", cfg.getString("DataPool.MySQL.Host"));
         cache.addStringValue("DataPool.MySQL.Port", cfg.getString("DataPool.MySQL.Port"));
+        cache.addStringValue("DataPool.MySQL.Prefix", cfg.getString("DataPool.MySQL.Prefix"));
         cache.addStringValue("DataPool.MySQL.Database", cfg.getString("DataPool.MySQL.Database"));
         cache.addStringValue("DataPool.MySQL.Username", cfg.getString("DataPool.MySQL.Username"));
         cache.addStringValue("DataPool.MySQL.Password", cfg.getString("DataPool.MySQL.Password"));

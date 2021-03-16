@@ -41,11 +41,10 @@ public class MySQL {
     public void reconnect() {
         try {
             ccs.sendMessage(data.getPrefix() + "§aTrying to reconnect to MySQL-Server §e" + host + " §a...");
-            Class.forName("org.mariadb.jdbc.Driver");
             connection = DriverManager.getConnection("jdbc:mysql://" + host + ":" + port + "/" + database, username, password);
             ccs.sendMessage(data.getPrefix() + "§aConnection to MySQL-Server successfully established.");
             createTable();
-        } catch (SQLException | ClassNotFoundException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
             ccs.sendMessage(data.getPrefix() + "§cCould not connect to MySQL!");
         }
@@ -268,17 +267,19 @@ public class MySQL {
 
     public void createTable() {
         if (!isConnected()) {
-            System.out.println("§cEs existiert keine Verbindung zu MySQL!");
+            ccs.sendMessage(data.getPrefix() + "§cThere is no connection to MySQL!");
             return;
         }
         try {
-            PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS Messages(messageId VARCHAR(100), message VARCHAR(2000), author VARCHAR(100))");
+            PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys(uuid VARCHAR(36), authKey VARCHAR(32), verified BOOLEAN)");
             ps.executeUpdate();
-            PreparedStatement ps1 = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS Transactions(paymentId VARCHAR(100), userid VARCHAR(100), email VARCHAR(100), DONE BOOLEAN)");
+            PreparedStatement ps1 = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + cache.getStringValue("DataPool.MySQL.Prefix") + "userSessions(uuid VARCHAR(36), lastConnectedIp VARCHAR(32), lastConnectedTimestamp LONG)");
             ps1.executeUpdate();
-            System.out.println("§aStandart Table wurden erfolgreich erstellt.");
+
+            ccs.sendMessage(data.getPrefix() + "§aDefault tables were created successfully!");
         } catch (SQLException e) {
-            System.out.println("§cStandart Table konnten nicht erstelt werden!");
+            ccs.sendMessage(data.getPrefix() + "§cDefault tables could not be created!");
+            e.printStackTrace();
         }
     }
 
