@@ -244,4 +244,8 @@ public class SecureJoin extends JavaPlugin {
     public static Cache getCache() {
         return cache;
     }
+
+    public static MySQL getMySQL() {
+        return mySQL;
+    }
 }
