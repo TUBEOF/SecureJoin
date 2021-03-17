@@ -5,6 +5,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.command.ConsoleCommandSender;
 
 import java.sql.*;
+import java.util.UUID;
 
 public class MySQL {
 
@@ -70,136 +71,68 @@ public class MySQL {
         return connection;
     }
 
-    public String getPaymentId(String userId) {
+    public boolean hasPlayerAuthEnabled(UUID uuid) {
         try {
-            ResultSet rs = getResult("SELECT * FROM Transactions WHERE userid='" + userId + "'");
-            if(rs.next()) return rs.getString("paymentId");
+            PreparedStatement ps = getConnection().prepareStatement("SELECT uuid FROM ? WHERE uuid = ?");
+            ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
+            ps.setString(2, uuid.toString());
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
         } catch (SQLNonTransientConnectionException e) {
             reconnect();
-            return getPaymentId(userId);
+            return hasPlayerAuthEnabled(uuid);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public String getAuthKey(UUID uuid) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("SELECT authKey FROM ? WHERE uuid = ?");
+            ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
+            ps.setString(2, uuid.toString());
+            ResultSet rs = getResult(ps);
+            if(rs.next()) return rs.getString("authKey");
+        } catch (SQLNonTransientConnectionException e) {
+            reconnect();
+            return getAuthKey(uuid);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return "NULL";
     }
 
-    public boolean isMessageExists(String messageId) {
+    public boolean isAuthKeyExists(String authKey) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("SELECT messageId FROM Messages WHERE messageId = ?");
-            ps.setString(1, messageId);
+            PreparedStatement ps = getConnection().prepareStatement("SELECT authKey FROM ? WHERE authKey = ?");
+            ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
+            ps.setString(2, authKey);
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (SQLNonTransientConnectionException e) {
             reconnect();
-            return isMessageExists(messageId);
+            return isAuthKeyExists(authKey);
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return false;
     }
 
-    public boolean isPaymentExists(String paymentId) {
-        try {
-            PreparedStatement ps = getConnection().prepareStatement("SELECT paymentId FROM Transactions WHERE paymentId = ?");
-            ps.setString(1, paymentId);
-            ResultSet rs = ps.executeQuery();
-            return rs.next();
-        } catch (SQLNonTransientConnectionException e) {
-            reconnect();
-            return isPaymentExists(paymentId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean isPaymentClaimed(String paymentId) {
-        try {
-            PreparedStatement ps = getConnection().prepareStatement("SELECT * FROM Transactions WHERE paymentId = ?");
-            ps.setString(1, paymentId);
-            ResultSet rs = ps.executeQuery();
-            if(rs.next()) return rs.getBoolean("DONE");
-        } catch (SQLNonTransientConnectionException e) {
-            reconnect();
-            return isPaymentExists(paymentId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean updateMessage(String messageId, String newText) {
-        if (isMessageExists(messageId)) {
+    public boolean createAuthKey(UUID uuid, String authKey) {
+        if (!isAuthKeyExists(authKey)) {
             try {
-                PreparedStatement ps = getConnection().prepareStatement("UPDATE Messages SET message = ? WHERE messageId = ?");
-                ps.setString(1, newText);
-                ps.setString(2, messageId);
-                ps.executeUpdate();
-
-                return true;
-            } catch (SQLNonTransientConnectionException e) {
-                reconnect();
-                return updateMessage(messageId, newText);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        } else {
-            System.out.println(messageId + " existiert in der Datenbank nicht und kann nicht geändert werden!");
-        }
-        return false;
-    }
-
-    public boolean createMessage(String messageId, String message, String author) {
-        if (!isMessageExists(messageId)) {
-            try {
-                PreparedStatement ps = getConnection().prepareStatement("INSERT INTO Messages (messageId,message,author) VALUES (?,?,?)");
-                ps.setString(1, messageId);
-                ps.setString(2, message);
-                ps.setString(3, author);
-                ps.executeUpdate();
-
-                return true;
-            } catch (SQLNonTransientConnectionException e) {
-                reconnect();
-                return createMessage(messageId, message, author);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
-
-    public boolean deleteMessage(String messageId) {
-        if (isMessageExists(messageId)) {
-            try {
-                PreparedStatement ps = getConnection().prepareStatement("DELETE FROM Messages WHERE messageId='" + messageId + "'");
-                ps.executeUpdate();
-
-                return true;
-            } catch (SQLNonTransientConnectionException e) {
-                reconnect();
-                return deleteMessage(messageId);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
-
-    public boolean createTransaction(String paymentId) {
-        if (!isPaymentExists(paymentId)) {
-            try {
-                PreparedStatement ps = getConnection().prepareStatement("INSERT INTO Transactions (paymentId,userId,email,DONE) VALUES (?,?,?,?)");
-                ps.setString(1, paymentId);
-                ps.setString(2, "NULL");
-                ps.setString(3, "NULL");
+                PreparedStatement ps = getConnection().prepareStatement("INSERT INTO ? (uuid,authKey,verified) VALUES (?,?,?)");
+                ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
+                ps.setString(2, uuid.toString());
+                ps.setString(3, authKey);
                 ps.setBoolean(4, false);
                 ps.executeUpdate();
 
                 return true;
             } catch (SQLNonTransientConnectionException e) {
                 reconnect();
-                return createTransaction(paymentId);
+                return createAuthKey(uuid, authKey);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -207,20 +140,19 @@ public class MySQL {
         return false;
     }
 
-    public boolean createTransaction(String paymentId, String email) {
-        if (!isPaymentExists(paymentId)) {
+    public boolean updateVerifiedState(String authKey, Boolean state) {
+        if (isAuthKeyExists(authKey)) {
             try {
-                PreparedStatement ps = getConnection().prepareStatement("INSERT INTO Transactions (paymentId,userId,email,DONE) VALUES (?,?,?,?)");
-                ps.setString(1, paymentId);
-                ps.setString(2, "NULL");
-                ps.setString(3, email);
-                ps.setBoolean(4, false);
+                PreparedStatement ps = getConnection().prepareStatement("UPDATE ? SET verified = ? WHERE authKey = ?");
+                ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
+                ps.setBoolean(2, state);
+                ps.setString(3, authKey);
                 ps.executeUpdate();
 
                 return true;
             } catch (SQLNonTransientConnectionException e) {
                 reconnect();
-                return createTransaction(paymentId, email);
+                return updateVerifiedState(authKey, state);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -228,39 +160,21 @@ public class MySQL {
         return false;
     }
 
-    public boolean deleteTransaction(String paymentID) {
-        if (isPaymentExists(paymentID)) {
+    public boolean deleteAuthKey(String authKey) {
+        if (isAuthKeyExists(authKey)) {
             try {
-                PreparedStatement ps = getConnection().prepareStatement("DELETE FROM Transactions WHERE paymentId='" + paymentID + "'");
+                PreparedStatement ps = getConnection().prepareStatement("DELETE FROM ? WHERE authkey = ?");
+                ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
+                ps.setString(2, authKey);
                 ps.executeUpdate();
-                return true;
-            } catch (SQLNonTransientConnectionException e) {
-                reconnect();
-                return deleteTransaction(paymentID);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        }
-        return false;
-    }
 
-    public boolean updatePayment(String paymentId, String userId) {
-        if (isPaymentExists(paymentId)) {
-            try {
-                PreparedStatement ps = getConnection().prepareStatement("UPDATE Transactions SET userid = ?, DONE = ? WHERE paymentId = ?");
-                ps.setString(1, userId);
-                ps.setBoolean(2, true);
-                ps.setString(3, paymentId);
-                ps.executeUpdate();
                 return true;
             } catch (SQLNonTransientConnectionException e) {
                 reconnect();
-                return updatePayment(paymentId, userId);
+                return deleteAuthKey(authKey);
             } catch (SQLException e) {
                 e.printStackTrace();
             }
-        } else {
-            System.out.println(paymentId + " existiert in der Datenbank nicht und kann nicht geändert werden!");
         }
         return false;
     }
@@ -283,40 +197,13 @@ public class MySQL {
         }
     }
 
-    public ResultSet getResult(String query) {
+    public ResultSet getResult(PreparedStatement preparedStatement) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement(query);
-            ResultSet rs = ps.executeQuery();
+            ResultSet rs = preparedStatement.executeQuery();
             return rs;
         } catch (SQLException ex) {
             ex.printStackTrace();
             return null;
         }
-    }
-
-    public String getOldMessage(String messageId) {
-        try {
-            ResultSet rs = getResult("SELECT * FROM Messages WHERE messageId='" + messageId + "'");
-            if(rs.next()) return rs.getString("message");
-        } catch (SQLNonTransientConnectionException e) {
-            reconnect();
-            return getOldMessage(messageId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "NULL";
-    }
-
-    public String getAuthor(String messageId) {
-        try {
-            ResultSet rs = getResult("SELECT * FROM Messages WHERE messageId='" + messageId + "'");
-            if(rs.next()) return rs.getString("author");
-        } catch (SQLNonTransientConnectionException e) {
-            reconnect();
-            return getAuthor(messageId);
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return "NULL";
     }
 }

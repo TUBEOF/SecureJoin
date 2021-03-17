@@ -18,7 +18,7 @@ public class Config {
 
     public Config() {}
 
-    private final File file = new File("plugins/SecureLogin", "Config.yml");
+    private final File file = new File("plugins/SecureJoin", "Config.yml");
     private final FileConfiguration cfg = YamlConfiguration.loadConfiguration(file);
 
     public void configUpdateMessage() {

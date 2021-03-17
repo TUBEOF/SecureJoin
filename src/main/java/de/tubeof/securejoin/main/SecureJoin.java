@@ -4,6 +4,8 @@ import de.tubeof.securejoin.data.Cache;
 import de.tubeof.securejoin.data.Data;
 import de.tubeof.securejoin.data.MySQL;
 import de.tubeof.securejoin.files.Config;
+import de.tubeof.securejoin.listener.Join;
+import de.tubeof.securejoin.utils.GoogleAuthenticatorManager;
 import de.tubeof.securejoin.utils.IpFetcher;
 import de.tubeof.securejoin.utils.Metrics;
 import de.tubeof.tubetils.main.TubeTils;
@@ -32,6 +34,7 @@ public class SecureJoin extends JavaPlugin {
     private static Cache cache;
     private static Data data;
     private static Config config;
+    private static GoogleAuthenticatorManager googleAuthenticatorManager;
 
     @Override
     public void onEnable() {
@@ -47,6 +50,7 @@ public class SecureJoin extends JavaPlugin {
         manageFiles();
 
         mySQL = new MySQL(true);
+        googleAuthenticatorManager = new GoogleAuthenticatorManager();
 
         ccs.sendMessage(data.getLoggerPrefix() + "§7==================================================");
         ccs.sendMessage(data.getLoggerPrefix() + "§aJOIN MY DISCORD NOW: §ehttps://discord.gg/73ZDfbx");
@@ -150,6 +154,7 @@ public class SecureJoin extends JavaPlugin {
     private void registerListener() {
         ccs.sendMessage(data.getLoggerPrefix() + "§aListeners will be registered ...");
 
+        pluginManager.registerEvents(new Join(), this);
 
         ccs.sendMessage(data.getLoggerPrefix() + "§aListeners have been successfully registered!");
     }
@@ -247,5 +252,9 @@ public class SecureJoin extends JavaPlugin {
 
     public static MySQL getMySQL() {
         return mySQL;
+    }
+
+    public static GoogleAuthenticatorManager getGoogleAuthenticatorManager() {
+        return googleAuthenticatorManager;
     }
 }
