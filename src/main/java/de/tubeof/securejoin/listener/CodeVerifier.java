@@ -24,14 +24,18 @@ public class CodeVerifier implements Listener {
         event.setCancelled(true);
 
         String authKey = mySQL.getAuthKey(player.getUniqueId());
-        Integer code = Integer.parseInt(event.getMessage());
-        if(googleAuthenticatorManager.isCodeValid(authKey, code)) {
-            googleAuthenticatorManager.changePlayerVerifyState(player.getUniqueId(), false);
-            player.sendMessage(data.getPrefix() + "§aErfolgreich verifiziert!");
-            if(!mySQL.isAuthVerified(authKey)) {
-                mySQL.updateVerifiedState(authKey, true);
+        try {
+            Integer code = Integer.parseInt(event.getMessage());
+            if(googleAuthenticatorManager.isCodeValid(authKey, code)) {
+                googleAuthenticatorManager.changePlayerVerifyState(player.getUniqueId(), false);
+                player.sendMessage(data.getPrefix() + "§aErfolgreich verifiziert!");
+                if(!mySQL.isAuthVerified(authKey)) {
+                    mySQL.updateVerifiedState(authKey, true);
+                }
+            } else {
+                player.sendMessage(data.getPrefix() + "§cDer Code ist falsch!");
             }
-        } else {
+        } catch (NumberFormatException exception) {
             player.sendMessage(data.getPrefix() + "§cDer Code ist falsch!");
         }
     }
