@@ -29,9 +29,7 @@ public class CodeVerifier implements Listener {
             if(googleAuthenticatorManager.isCodeValid(authKey, code)) {
                 googleAuthenticatorManager.changePlayerVerifyState(player.getUniqueId(), false);
                 player.sendMessage(data.getPrefix() + "§aErfolgreich verifiziert!");
-                if(!mySQL.isAuthVerified(authKey)) {
-                    mySQL.updateVerifiedState(authKey, true);
-                }
+                mySQL.updateVerifiedState(authKey, true);
             } else {
                 player.sendMessage(data.getPrefix() + "§cDer Code ist falsch!");
             }
