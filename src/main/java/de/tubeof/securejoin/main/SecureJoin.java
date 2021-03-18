@@ -4,6 +4,7 @@ import de.tubeof.securejoin.data.Cache;
 import de.tubeof.securejoin.data.Data;
 import de.tubeof.securejoin.data.MySQL;
 import de.tubeof.securejoin.files.Config;
+import de.tubeof.securejoin.listener.CodeVerifier;
 import de.tubeof.securejoin.listener.Join;
 import de.tubeof.securejoin.utils.GoogleAuthenticatorManager;
 import de.tubeof.securejoin.utils.IpFetcher;
@@ -155,6 +156,7 @@ public class SecureJoin extends JavaPlugin {
         ccs.sendMessage(data.getLoggerPrefix() + "§aListeners will be registered ...");
 
         pluginManager.registerEvents(new Join(), this);
+        pluginManager.registerEvents(new CodeVerifier(), this);
 
         ccs.sendMessage(data.getLoggerPrefix() + "§aListeners have been successfully registered!");
     }

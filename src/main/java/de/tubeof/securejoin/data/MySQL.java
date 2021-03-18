@@ -25,6 +25,8 @@ public class MySQL {
         if (connect) connect();
     }
 
+    private final String tableUserAuthKeys = cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys";
+
     public void connect() {
         if (!isConnected()) {
             try {
@@ -73,9 +75,8 @@ public class MySQL {
 
     public boolean hasPlayerAuthEnabled(UUID uuid) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("SELECT uuid FROM ? WHERE uuid = ?");
-            ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
-            ps.setString(2, uuid.toString());
+            PreparedStatement ps = getConnection().prepareStatement("SELECT uuid FROM " + tableUserAuthKeys + " WHERE uuid = ?");
+            ps.setString(1, uuid.toString());
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (SQLNonTransientConnectionException e) {
@@ -89,9 +90,8 @@ public class MySQL {
 
     public String getAuthKey(UUID uuid) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("SELECT authKey FROM ? WHERE uuid = ?");
-            ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
-            ps.setString(2, uuid.toString());
+            PreparedStatement ps = getConnection().prepareStatement("SELECT authKey FROM " + tableUserAuthKeys + " WHERE uuid = ?");
+            ps.setString(1, uuid.toString());
             ResultSet rs = getResult(ps);
             if(rs.next()) return rs.getString("authKey");
         } catch (SQLNonTransientConnectionException e) {
@@ -105,9 +105,23 @@ public class MySQL {
 
     public boolean isAuthKeyExists(String authKey) {
         try {
-            PreparedStatement ps = getConnection().prepareStatement("SELECT authKey FROM ? WHERE authKey = ?");
-            ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
-            ps.setString(2, authKey);
+            PreparedStatement ps = getConnection().prepareStatement("SELECT authKey FROM " + tableUserAuthKeys + " WHERE authKey = ?");
+            ps.setString(1, authKey);
+            ResultSet rs = ps.executeQuery();
+            return rs.next();
+        } catch (SQLNonTransientConnectionException e) {
+            reconnect();
+            return isAuthKeyExists(authKey);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean isAuthVerified(String authKey) {
+        try {
+            PreparedStatement ps = getConnection().prepareStatement("SELECT verified FROM " + tableUserAuthKeys + " WHERE authKey = ?");
+            ps.setString(1, authKey);
             ResultSet rs = ps.executeQuery();
             return rs.next();
         } catch (SQLNonTransientConnectionException e) {
@@ -122,11 +136,10 @@ public class MySQL {
     public boolean createAuthKey(UUID uuid, String authKey) {
         if (!isAuthKeyExists(authKey)) {
             try {
-                PreparedStatement ps = getConnection().prepareStatement("INSERT INTO ? (uuid,authKey,verified) VALUES (?,?,?)");
-                ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
-                ps.setString(2, uuid.toString());
-                ps.setString(3, authKey);
-                ps.setBoolean(4, false);
+                PreparedStatement ps = getConnection().prepareStatement("INSERT INTO " + tableUserAuthKeys + " (uuid,authKey,verified) VALUES (?,?,?)");
+                ps.setString(1, uuid.toString());
+                ps.setString(2, authKey);
+                ps.setBoolean(3, false);
                 ps.executeUpdate();
 
                 return true;
@@ -143,10 +156,9 @@ public class MySQL {
     public boolean updateVerifiedState(String authKey, Boolean state) {
         if (isAuthKeyExists(authKey)) {
             try {
-                PreparedStatement ps = getConnection().prepareStatement("UPDATE ? SET verified = ? WHERE authKey = ?");
-                ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
-                ps.setBoolean(2, state);
-                ps.setString(3, authKey);
+                PreparedStatement ps = getConnection().prepareStatement("UPDATE " + tableUserAuthKeys + " SET verified = ? WHERE authKey = ?");
+                ps.setBoolean(1, state);
+                ps.setString(2, authKey);
                 ps.executeUpdate();
 
                 return true;
@@ -163,9 +175,8 @@ public class MySQL {
     public boolean deleteAuthKey(String authKey) {
         if (isAuthKeyExists(authKey)) {
             try {
-                PreparedStatement ps = getConnection().prepareStatement("DELETE FROM ? WHERE authkey = ?");
-                ps.setString(1, cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys");
-                ps.setString(2, authKey);
+                PreparedStatement ps = getConnection().prepareStatement("DELETE FROM " + tableUserAuthKeys + " WHERE authkey = ?");
+                ps.setString(1, authKey);
                 ps.executeUpdate();
 
                 return true;
@@ -185,9 +196,9 @@ public class MySQL {
             return;
         }
         try {
-            PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + cache.getStringValue("DataPool.MySQL.Prefix") + "userAuthKeys(uuid VARCHAR(36), authKey VARCHAR(32), verified BOOLEAN)");
+            PreparedStatement ps = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + tableUserAuthKeys + "(uuid VARCHAR(36), authKey VARCHAR(32), verified BOOLEAN)");
             ps.executeUpdate();
-            PreparedStatement ps1 = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + cache.getStringValue("DataPool.MySQL.Prefix") + "userSessions(uuid VARCHAR(36), lastConnectedIp VARCHAR(32), lastConnectedTimestamp LONG)");
+            PreparedStatement ps1 = getConnection().prepareStatement("CREATE TABLE IF NOT EXISTS " + tableUserAuthKeys + "(uuid VARCHAR(36), lastConnectedIp VARCHAR(32), lastConnectedTimestamp LONG)");
             ps1.executeUpdate();
 
             ccs.sendMessage(data.getLoggerPrefix() + "§aDefault tables were created successfully!");

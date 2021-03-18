@@ -15,6 +15,8 @@ import de.tubeof.securejoin.main.SecureJoin;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.UUID;
 
 public class GoogleAuthenticatorManager {
 
@@ -23,6 +25,8 @@ public class GoogleAuthenticatorManager {
     private final MySQL mySQL = SecureJoin.getMySQL();
 
     public GoogleAuthenticatorManager() {}
+
+    private ArrayList<UUID> verifingPlayers = new ArrayList<>();
 
     public String generateAuthKey() {
         GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
@@ -42,6 +46,15 @@ public class GoogleAuthenticatorManager {
     public Boolean isCodeValid(String authKey, Integer code) {
         GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
         return googleAuthenticator.authorize(authKey, code);
+    }
+
+    public void changePlayerVerifyState(UUID uuid, Boolean state) {
+        if(state) verifingPlayers.add(uuid);
+        else verifingPlayers.remove(uuid);
+    }
+
+    public Boolean isPlayerVerifing(UUID uuid) {
+        return verifingPlayers.contains(uuid);
     }
 
 }

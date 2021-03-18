@@ -9,18 +9,16 @@ import de.tubeof.securejoin.data.MySQL;
 import de.tubeof.securejoin.main.SecureJoin;
 import de.tubeof.securejoin.utils.GoogleAuthenticatorManager;
 import de.tubeof.tubetils.api.itembuilder.ItemBuilder;
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
 
 import javax.imageio.ImageIO;
-import javax.imageio.ImageReader;
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.UUID;
 
 public class Join implements Listener {
 
@@ -35,10 +33,41 @@ public class Join implements Listener {
         Player player = event.getPlayer();
 
         if(mySQL.hasPlayerAuthEnabled(player.getUniqueId())) {
+            String authKey = mySQL.getAuthKey(player.getUniqueId());
+            if(!mySQL.isAuthVerified(authKey)) {
+                mySQL.deleteAuthKey(authKey);
+                player.sendMessage(data.getPrefix() + "§cDein Auth-Key wurde bisher nicht verifiziert! Es wird ein neuer Key erstellt ...");
 
+                String key = googleAuthenticatorManager.generateAuthKey();
+                try {
+                    googleAuthenticatorManager.generateQrCode(key, "otpauth://totp/Example:alice@google.com?secret=" + key + "&issuer=ExampleIssues");
+                } catch (WriterException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    File image = new File("plugins/SecureJoin/tmp/" + key + ".png");
+                    BufferedImage bufferedImage = ImageIO.read(image);
+                    ImageRenderer renderer = ImageRenderer.create(bufferedImage);
+                    RenderedMap map = RenderedMap.create(renderer);
+                    player.getInventory().addItem(map.createItemStack());
+                    player.updateInventory();
+                    image.delete();
+
+                    mySQL.createAuthKey(player.getUniqueId(), key);
+                    googleAuthenticatorManager.changePlayerVerifyState(player.getUniqueId(), true);
+                    player.sendMessage(data.getPrefix() + "§aBitte gebe den Code zur Verifizierung ein!");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                player.sendMessage(data.getPrefix() + "§aBitte geben den Code ein!");
+                googleAuthenticatorManager.changePlayerVerifyState(player.getUniqueId(), true);
+            }
         } else {
             String key = googleAuthenticatorManager.generateAuthKey();
-            player.sendMessage(data.getPrefix() + "§aDein Key: §e" + key);
 
             try {
                 googleAuthenticatorManager.generateQrCode(key, "otpauth://totp/Example:alice@google.com?secret=" + key + "&issuer=ExampleIssues");
@@ -55,6 +84,11 @@ public class Join implements Listener {
                 RenderedMap map = RenderedMap.create(renderer);
                 player.getInventory().addItem(map.createItemStack());
                 player.updateInventory();
+                image.delete();
+
+                mySQL.createAuthKey(player.getUniqueId(), key);
+                googleAuthenticatorManager.changePlayerVerifyState(player.getUniqueId(), true);
+                player.sendMessage(data.getPrefix() + "§aBitte gebe den Code zur Verifizierung ein!");
             } catch (IOException e) {
                 e.printStackTrace();
             }
