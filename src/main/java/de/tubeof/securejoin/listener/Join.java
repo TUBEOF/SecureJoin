@@ -24,7 +24,6 @@ public class Join implements Listener {
     private final Data data = SecureJoin.getData();
     private final Cache cache = SecureJoin.getCache();
     private final MySQL mySQL = SecureJoin.getMySQL();
-    private final ItemBuilder itemBuilder = new ItemBuilder("SecureJoinItemBuilder");
     private final GoogleAuthenticatorManager googleAuthenticatorManager = SecureJoin.getGoogleAuthenticatorManager();
 
     @EventHandler
