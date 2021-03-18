@@ -21,6 +21,8 @@ public class CodeVerifier implements Listener {
     public void onChat(AsyncPlayerChatEvent event) {
         Player player = event.getPlayer();
         if(!googleAuthenticatorManager.isPlayerVerifing(player.getUniqueId())) return;
+        event.setCancelled(true);
+
         String authKey = mySQL.getAuthKey(player.getUniqueId());
         Integer code = Integer.parseInt(event.getMessage());
         if(googleAuthenticatorManager.isCodeValid(authKey, code)) {
