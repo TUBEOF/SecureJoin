@@ -123,7 +123,7 @@ public class MySQL {
             PreparedStatement ps = getConnection().prepareStatement("SELECT verified FROM " + tableUserAuthKeys + " WHERE authKey = ?");
             ps.setString(1, authKey);
             ResultSet rs = ps.executeQuery();
-            return rs.getBoolean("verified");
+            if(rs.next()) return rs.getBoolean("verified");
         } catch (SQLNonTransientConnectionException e) {
             reconnect();
             return isAuthKeyExists(authKey);
