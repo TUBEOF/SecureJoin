@@ -26,7 +26,6 @@ import java.util.*;
 
 public class SecureJoin extends JavaPlugin {
 
-    private final String prefixTubeTilsChecker = "§7[§eTubeTilsChecker§7] §f";
     private final ConsoleCommandSender ccs = Bukkit.getConsoleSender();
     private final PluginManager pluginManager = Bukkit.getPluginManager();
 
@@ -73,6 +72,7 @@ public class SecureJoin extends JavaPlugin {
         ccs.sendMessage(data.getLoggerPrefix() + "§aThe plugin was successfully deactivated!");
     }
 
+    private final String prefixTubeTilsChecker = "§7[§eTubeTilsChecker§7] §f";
     private void checkTubeTils() {
         Plugin tubetils = pluginManager.getPlugin("TubeTils");
         if(tubetils == null) {
